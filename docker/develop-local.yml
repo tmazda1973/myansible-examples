@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  become: yes
+  connection: local
+  roles:
+    - common
+    - composer
+    - vagrant
+    - docker/provision
+    - docker/deploy/orca

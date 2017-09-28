@@ -1,0 +1,105 @@
+---
+#-------------------------------------------------------------------------------
+# Install yum module
+#-------------------------------------------------------------------------------
+- name: install MySQL-python
+  yum: name=MySQL-python state=present
+  tags:
+    - mysql-nginx
+
+#-------------------------------------------------------------------------------
+# Install MySQL
+#-------------------------------------------------------------------------------
+- name: add MySQL rpm
+  command: rpm -ih http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm creates=/etc/yum.repos.d/mysql-community.repo
+  tags:
+    - mysql-nginx
+
+- name: install MySQL
+  yum: name={{ item }} state=present
+  with_items:
+    - mysql-community-server
+    - mysql-devel
+  tags:
+    - mysql-nginx
+
+- name: install php-mysql
+  yum: name={{ item }} state=present enablerepo=remi,remi-php56
+  with_items:
+    - php-mysql
+    - php-mysqlnd
+  tags:
+    - mysql-nginx
+
+#-------------------------------------------------------------------------------
+# Install phpMyAdmin
+#-------------------------------------------------------------------------------
+- name: install phpMyAdmin
+  yum: name=phpMyAdmin enablerepo=remi,remi-php56
+  tags:
+    - mysql-nginx
+
+- name: update phpMyAdmin config.inc.php
+  replace: dest=/etc/phpMyAdmin/config.inc.php
+    regexp='\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = false;'
+    replace='$cfg['Servers'][$i]['AllowNoPassword'] = true;'
+    backup=yes
+  tags:
+    - mysql-nginx
+
+- name: create nginx default.d directory
+  file: path=/etc/nginx/default.d state=directory owner=root group=root mode=755
+  tags:
+    - mysql-nginx
+
+- name: copy phpmyadmin.conf
+  template: src=phpmyadmin.conf.j2 dest=/etc/nginx/default.d/phpmyadmin.conf backup=yes
+  tags:
+    - mysql-nginx
+
+- name: restart nginx
+  service: name=nginx state=restarted
+  tags:
+    - mysql-nginx
+
+#-------------------------------------------------------------------------------
+# Setup MySQL
+#-------------------------------------------------------------------------------
+- name: enable MySQL service
+  service: name=mysqld state=started enabled=yes
+  tags:
+    - mysql-nginx
+    - database
+
+- name: setup mysql root
+  mysql_user: name=root host={{ item }} password={{ mysql.root.password }}
+  ignore_errors: true
+  with_items:
+    - 127.0.0.1
+    - localhost
+  tags:
+    - mysql-nginx
+    - database
+
+- name: copy .my.cnf
+  template: src=.my.cnf.j2 dest={{ lookup('env', 'HOME') }}/.my.cnf owner=root mode=0600
+  tags:
+    - mysql-nginx
+    - database
+
+- name: create mysql user
+  mysql_user:
+    name={{ mysql.user.name }}
+    password={{ mysql.user.password }}
+    priv=*.*:ALL,GRANT
+    login_user=root
+    login_password={{ mysql.root.password }}
+  tags:
+    - mysql-nginx
+    - database
+
+- name: create mysql database
+  mysql_db: name={{ mysql.database }} state=present
+  tags:
+    - mysql-nginx
+    - database

@@ -1,0 +1,7 @@
+---
+  document_root: /var/www/wordpress
+  app_root: /var/www/wordpress
+  css_root: /var/www/wordpress/css
+  js_root: /var/www/wordpress/js
+  font_root: /var/www/wordpress/fonts
+  image_root: /var/www/wordpress/images

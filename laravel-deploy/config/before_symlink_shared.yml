@@ -1,0 +1,26 @@
+---
+# TODO: - stat: path="{{ ansistrano_shared_path.stdout }}/.env"
+- stat: path="{{ ansistrano_shared_path }}/.env"
+  register: env_file
+
+- name: Copy .env to shared directory
+  copy:
+# TODO: ansistrano_shared_path は register されていないため、.stdoutを指定できない
+# TODO:   src: "{{ ansistrano_release_path }}.stdout/.env.example"
+    src: "{{ ansistrano_release_path.stdout }}/.env.develop"
+# TODO: ansistrano_shared_path は register されていないため、.stdoutを指定できない
+# TODO:   dest: "{{ ansistrano_shared_path.stdout }}/.env"
+    dest: "{{ ansistrano_shared_path }}/.env"
+    remote_src: True
+  when: env_file.stat.exists == False
+
+# TODO: ansistrano_shared_path は register されていないため、.stdoutを指定できない
+# TODO: - stat: path="{{ ansistrano_shared_path.stdout }}/storage"
+- stat: path="{{ ansistrano_shared_path }}/storage"
+  register: storage_dir
+
+- name: Copy storage directory
+# TODO: ansistrano_shared_path は register されていないため、.stdoutを指定できない
+# TODO: command: "cp -r {{ ansistrano_release_path.stdout }}/storage {{ ansistrano_shared_path.stdout }}/storage"
+  command: "cp -r {{ ansistrano_release_path.stdout }}/storage {{ ansistrano_shared_path }}/storage"
+  when: storage_dir.stat.exists == False

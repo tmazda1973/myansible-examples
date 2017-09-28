@@ -1,0 +1,6 @@
+*.retry
+*.cache
+
+production
+staging
+develop

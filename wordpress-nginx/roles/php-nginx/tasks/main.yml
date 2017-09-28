@@ -1,0 +1,73 @@
+---
+#*******************************************************************************************
+# PHP tasks for nginx
+#*******************************************************************************************
+#-------------------------------------------------------------------------------
+# Install PHP
+#-------------------------------------------------------------------------------
+- name: install php
+  yum: name={{ item }} state=present enablerepo=remi,remi-php56
+  with_items:
+    - php
+    - php-devel
+    - php-mbstring
+    - php-mcrypt
+    - php-pear
+    - php-pecl-xdebug
+    - php-xml
+    - php-phpunit-PHPUnit
+    - php-gd
+    - php-bcmath
+    - gcc
+    - ImageMagick
+    - ImageMagick-devel
+    - php-pecl-imagick
+  tags:
+    - php-nginx
+
+#-------------------------------------------------------------------------------
+# Setup PHP
+#-------------------------------------------------------------------------------
+- name: copy xdebug.ini
+  template: src=xdebug.ini.j2 dest=/etc/php.d/xdebug.ini backup=yes
+  tags:
+    - php-nginx
+
+- name: update php.ini
+  replace: dest=/etc/php.ini regexp='^;date\.timezone =' replace='date.timezone = "{{ zone }}"' backup=yes
+  tags:
+    - php-nginx
+
+- name: update php.ini
+  replace: dest=/etc/php.ini regexp='^;upload_tmp_dir =' replace='upload_tmp_dir = "{{ upload_tmp_dir }}"'
+  when:
+    - upload_tmp_dir is defined
+  tags:
+    - php-nginx
+
+- name: update php.ini
+  replace: dest=/etc/php.ini regexp='^;session\.save_path =' replace='session.save_path = "{{ session_save_path }}"' backup=yes
+  when:
+    - session_save_path is defined
+  tags:
+    - php-nginx
+
+- name: set permissions for session directory
+  command: chown -R nginx:nginx {{ session_save_path }}
+  when:
+     - session_save_path is defined
+  tags:
+    - php-nginx
+
+- name: copy imagick.ini
+  template: src=imagick.ini.j2 dest=/etc/php.d/imagick.ini backup=yes
+  tags:
+    - php-nginx
+
+#-------------------------------------------------------------------------------
+# Restart PHP-FPM
+#-------------------------------------------------------------------------------
+- name: restart php-fpm
+  service: name=php-fpm state=restarted
+  tags:
+    - php-nginx

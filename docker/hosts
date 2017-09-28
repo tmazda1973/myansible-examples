@@ -1,0 +1,9 @@
+[docker-clinicsystem]
+clinicsystem
+
+[develop]
+192.168.21.145
+
+[staging]
+
+[production]

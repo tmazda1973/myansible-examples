@@ -1,0 +1,48 @@
+---
+- name: Wordpresss | Ensure that installation directory exists
+  file: path={{ wordpress.install_dir|dirname }} state=directory
+  tags:
+    - wordpress
+
+- name: Wordpresss | Download {{ wordpress.version }} to /tmp
+  get_url: url=http://wordpress.org/wordpress-{{ wordpress.version }}.tar.gz force=no dest=/tmp/wordpress-{{ wordpress.version }}.tar.gz
+  # TODO sha256sum="{{ wp_sha256sum }}"
+  tags:
+    - wordpress
+
+- name: Wordpresss | Extract archive
+  unarchive: src=/tmp/wordpress-{{ wordpress.version }}.tar.gz dest=/tmp copy=no
+  tags:
+    - wordpress
+
+- name: Wordpresss | Move extracted directory to {{ wordpress.install_dir }}
+  command: /bin/mv /tmp/wordpress {{ wordpress.install_dir }} creates={{ wordpress.install_dir }}
+  tags:
+    - wordpress
+
+- name: Wordpresss | Remove wordpress-{{ wordpress.version }}.tar.gz
+  file: path=/tmp/wordpress-{{ wordpress.version }}.tar.gz state=absent
+  tags:
+    - wordpress
+
+- name: Wordpresss | Fetch random salts for wp-config.php
+  local_action: command curl https://api.wordpress.org/secret-key/1.1/salt/
+  sudo: no
+  register: 'wp_salt'
+  tags:
+    - wordpress
+
+- name: Wordpresss | Copy wp-config.php file
+  template: src=wp-config.php.j2 dest={{ wordpress.install_dir }}/wp-config.php
+  tags:
+    - wordpress
+
+- name: Wordpresss | Change ownership of installation directory
+  file: path={{ wordpress.install_dir }} owner=root group=root state=directory recurse=yes
+  tags:
+    - wordpress
+
+- name: Wordpresss | Change ownership of uploads directory
+  file: path={{ wordpress.install_dir }}/wp-content/uploads/ owner={{ wordpress.owner }} group={{ wordpress.group }} state=directory recurse=yes
+  tags:
+    - wordpress

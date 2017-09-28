@@ -1,0 +1,14 @@
+location ^~ /phpmyadmin {
+    alias {{ mysql.phpmyadmin.path }};
+    index index.php;
+
+    location ~ ^/phpmyadmin/(.+\.php)$ {
+        alias {{ mysql.phpmyadmin.path }}/$1;
+        fastcgi_pass unix:/var/run/php-fpm/php-fpm.sock;
+        fastcgi_param  SCRIPT_FILENAME {{ mysql.phpmyadmin.path }}/$1;
+        include fastcgi_params;
+        allow 127.0.0.1;
+        allow 192.168.33.0/24;
+        deny  all;
+    }
+}

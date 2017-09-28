@@ -1,0 +1,93 @@
+---
+#-------------------------------------------------------------------------------
+# Install Docker Modules
+#-------------------------------------------------------------------------------
+- name: install docker modules
+  yum: name={{ item }} state=latest
+  with_items:
+    - docker-io
+    - python-pip
+  tags:
+    - docker
+
+- name: update pip module
+  shell: |
+    pip install --upgrade pip;
+  tags:
+    - docker
+
+- name: create docker group
+  group: name={{ docker.group.name }} state=present
+  when: docker.group.name is defined
+  tags:
+    - docker
+
+- name: user join to docker group
+  user: name={{ docker.user.name }} append=yes groups={{ docker.group.name }}
+  when: [ docker.group.name is defined, docker.user.name is defined ]
+  tags:
+    - docker
+
+- name: update /etc/sysconfig/docker
+  replace: dest=/etc/sysconfig/docker regexp='^other_args=$' replace='other_args="{{ docker.other_args }}"' backup=yes
+  tags:
+    - docker
+
+- name: enable docker service
+  service:
+    name: docker
+    state: restarted
+    enabled: yes
+  tags:
+    - docker
+
+- name: install docker-compose
+  shell: |
+    curl -L "https://github.com/docker/compose/releases/download/1.5.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose;
+    chmod +x /usr/local/bin/docker-compose;
+  tags:
+    - docker
+
+- name: install docker-machine
+  shell: |
+    curl -L "https://github.com/docker/machine/releases/download/v0.9.0/docker-machine-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-machine;
+    chmod +x /usr/local/bin/docker-machine;
+  tags:
+    - docker
+
+#-------------------------------------------------------------------------------
+# Install docker relation packages
+#-------------------------------------------------------------------------------
+#- name: add repository 'ius'
+#  command: rpm -ivh http://dl.iuscommunity.org/pub/ius/stable/CentOS/6/x86_64/ius-release-1.0-11.ius.centos6.noarch.rpm creates=/etc/yum.repos.d/ius.repo
+#  tags:
+#    - docker
+#
+#- name: install python2.7 modules
+#  yum: name={{ item }} state=latest
+#  with_items:
+#    - python27
+#  tags:
+#    - docker
+
+- name: install pip
+  shell: |
+    cd /tmp; wget https://bootstrap.pypa.io/get-pip.py;
+    {{ python.bin }} get-pip.py;
+  tags:
+    - docker
+
+- name: update pip module
+  shell: |
+    pip install --upgrade pip;
+  tags:
+    - docker
+
+- name: install docker-py
+  pip:
+    name: "docker-py"
+    version: 1.7.1
+    state: present
+  ignore_errors: true
+  tags:
+    - docker

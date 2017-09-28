@@ -1,0 +1,52 @@
+---
+
+# Ansistrano defaults
+ansistrano_allow_anonymous_stats: no
+
+# Debug info
+ansistrano_before_setup_tasks_file: "{{ playbook_dir }}/config/before_setup_tasks.yml"
+# Copy shared files and dirs
+ansistrano_before_symlink_shared_tasks_file: "{{ playbook_dir }}/config/before_symlink_shared.yml"
+# Link uploads and run composer install
+ansistrano_after_symlink_shared_tasks_file: "{{ playbook_dir }}/config/after_symlink_shared.yml"
+# Clear application cache and optimize code
+ansistrano_before_symlink_tasks_file: "{{ playbook_dir }}/config/before_symlink.yml"
+# Chown all and restart queue
+ansistrano_after_symlink_tasks_file: "{{ playbook_dir }}/config/after_symlink.yml"
+
+# Repository info
+ansistrano_deploy_via: git
+ansistrano_git_repo: https://develop:1234567890@h2system.backlog.jp/git/XIRAPHA_MEDICAL_APP/admin-xirapha-medical.git
+ansistrano_git_branch: develop
+
+# Deployment params
+ansistrano_keep_releases: 5
+ansistrano_deploy_to: /var/www/laravel
+ansistrano_version_dir: releases
+ansistrano_current_dir: current
+ansistrano_shared_paths:
+  - storage
+ansistrano_shared_files:
+  - .env
+
+# Where uploads are stored. Set to false if don't use uploads
+#laravel_uploads_storage: /storage/app/public
+laravel_uploads_storage: false
+# Where to link them for public
+#laravel_uploads_public: /public/storage
+laravel_uploads_public: false
+
+owner: vagrant
+group: vagrant
+
+php_path: /usr/bin/php
+
+composer_path: "{{ ansistrano_deploy_to }}/composer.phar"
+composer_options: '--no-dev --optimize-autoloader --no-interaction'
+composer_self_update: true
+
+cachetool_path: "{{ ansistrano_deploy_to }}/cachetool.phar"
+cachetool_options: "--fcgi=/var/run/php-fpm/php-fpm.sock"
+
+run_gulp: false
+npm_path: /usr/bin/npm

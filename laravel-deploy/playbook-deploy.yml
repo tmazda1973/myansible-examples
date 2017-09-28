@@ -1,0 +1,5 @@
+---
+
+- hosts: laravel
+  roles:
+    - { role: carlosbuenosvinos.ansistrano-deploy }

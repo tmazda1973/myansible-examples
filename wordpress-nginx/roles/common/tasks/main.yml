@@ -1,0 +1,65 @@
+---
+- name: install libselinux-python
+  yum: name=libselinux-python state=present
+  tags:
+    - common
+
+- name: turn off selinux.
+  selinux: state=disabled
+  tags:
+    - common
+
+- name: set zone to /etc/sysconfig/clock
+  replace: dest=/etc/sysconfig/clock regexp='^ZONE=\"UTC\"' replace='ZONE="{{zone}}"'
+  tags:
+    - common
+
+- name: Remove default localtime
+  file: path=/etc/localtime state=absent
+  tags:
+    - common
+
+- name: Make localtime symlink to JST
+  file: src={{zoneinfo_path}} dest=/etc/localtime state=link mode=0644
+  tags:
+    - common
+
+- name: add repository 'epel'
+  command: rpm -ih http://ftp.jaist.ac.jp/pub/Linux/Fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm  creates=/etc/yum.repos.d/epel.repo
+  args:
+    warn: no
+  tags:
+    - common
+
+- name: add repository 'remi'
+  command: rpm -ih http://rpms.famillecollet.com/enterprise/remi-release-6.rpm creates=/etc/yum.repos.d/remi.repo
+  args:
+    warn: no
+  tags:
+    - common
+
+- name: yum upgrade all packages
+  yum: name=* state=latest
+  tags:
+    - common
+
+- name: install git
+  yum: name=git state=present
+  tags:
+    - common
+
+- name: install gcc
+  yum: name=gcc state=present
+  tags:
+    - common
+
+- name: install other packages
+  yum: name={{ item }} state=present
+  with_items:
+    - vim
+    - wget
+    - openssh-server
+    - zeromq
+  tags:
+    - common
+

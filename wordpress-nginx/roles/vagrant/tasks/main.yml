@@ -1,0 +1,10 @@
+---
+- name: vagrant mount settings
+  template: src=vagrant-mounted.conf.j2 dest=/etc/init/vagrant-mounted.conf backup=yes
+  tags:
+    - vagrant
+
+#- name: vagrant user add sudoers
+#  copy: content="vagrant ALL=(ALL) NOPASSWD:ALL" dest=/etc/sudoers.d/vagrant owner=root group=root
+#  tags:
+#    - vagrant

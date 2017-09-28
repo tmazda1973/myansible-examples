@@ -1,0 +1,52 @@
+#
+# The default server
+#
+
+server {
+    listen       80 default_server;
+    listen       [::]:80 default_server;
+    server_name  _;
+#    root         /usr/share/nginx/html;
+    root         {{ document_root }};
+
+    # Load configuration files for the default server block.
+    include /etc/nginx/default.d/*.conf;
+
+    location / {
+        index  index.html index.htm index.php;
+    }
+
+    location ~ \.php$ {
+        root           {{ document_root }};
+#        fastcgi_pass   127.0.0.1:9000;
+        fastcgi_pass   unix:/var/run/php-fpm/php-fpm.sock;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME  {{ document_root }}$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+
+    location /css {
+        alias {{ css_root }};
+    }
+
+    location /fonts {
+        alias {{ font_root }};
+    }
+
+    location /images {
+        alias {{ image_root }};
+    }
+
+    location /js {
+        alias {{ js_root }};
+    }
+
+#    error_page 404 /404.html;
+#        location = /40x.html {
+#    }
+
+#    error_page 500 502 503 504 /50x.html;
+#        location = /50x.html {
+#    }
+
+}

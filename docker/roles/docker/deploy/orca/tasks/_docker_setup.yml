@@ -1,0 +1,120 @@
+---
+# TODO: [2017.03.08] 全てのDockerイメージ、コンテナを削除する場合に実行する
+##-------------------------------------------------------------------------------
+## Clear all docker images and containers
+##-------------------------------------------------------------------------------
+#- name: clear all docker images and containers
+#  shell: |
+#    docker rm -f $(docker ps -a -q);
+#    docker rmi -f $(docker images | awk '{print $3}');
+#  ignore_errors: true
+#  tags:
+#    - orca
+
+#-------------------------------------------------------------------------------
+# Clear all unnecessary docker images
+#-------------------------------------------------------------------------------
+- name: clear all unnecessary docker images
+  shell: |
+    docker rmi -f $(docker images | awk '/^<none>/ { print $3 }');
+  ignore_errors: true
+  tags:
+    - orca
+
+#-------------------------------------------------------------------------------
+# Delete docker container
+#-------------------------------------------------------------------------------
+- name: delete docker container
+  docker_container:
+    image: "{{ docker.image.name }}"
+    name: "{{ item }}"
+    force_kill: true
+    state: absent
+  items:
+    - "{{ docker.container.orca_thj.name }}"
+    - "{{ docker.container.orca_tmi.name }}"
+    - "{{ docker.container.orca_thr.name }}"
+    - "{{ docker.container.orca_ttc.name }}"
+  ignore_errors: true
+  tags:
+    - orca
+
+#-------------------------------------------------------------------------------
+# Delete docker image
+#-------------------------------------------------------------------------------
+- name: delete docker image
+  docker_image:
+    name: "{{ docker.image.name }}"
+    force: true
+    state: absent
+  ignore_errors: true
+  tags:
+    - orca
+
+#-------------------------------------------------------------------------------
+# Build docker image
+#-------------------------------------------------------------------------------
+# 「RUN: apt-get」でエラーになる場合があるので、Dockerサービスを再起動する
+- name: restart docker service
+  service:
+    name: docker
+    state: restarted
+    enabled: yes
+  tags:
+    - orca
+
+- name: build docker image
+  docker_image:
+    path: "{{ docker.tools.home }}/{{ docker.tools.name}}/docker"
+    name: "{{ docker.image.name }}"
+    state: present
+    nocache: true
+  tags:
+    - orca
+
+#-------------------------------------------------------------------------------
+# Run docker container
+#-------------------------------------------------------------------------------
+- name: run docker container --> [orca_thj]
+  shell: |
+    docker run \
+    --name {{ docker.container.orca_thj.name }} -it -d \
+    --restart=always \
+    -p 8100:8000 -p 5432:5432 -p 2322:22 \
+    -e CLINIC_TYPE=THJ \
+    {{ docker.image.name }};
+  tags:
+    - orca
+
+- name: run docker container --> [orca_tmi]
+  shell: |
+    docker run \
+    --name {{ docker.container.orca_tmi.name }} -it -d \
+    --restart=always \
+    -p 8200:8000 -p 5532:5432 -p 2422:22 \
+    -e CLINIC_TYPE=TMI \
+    {{ docker.image.name }};
+  tags:
+    - orca
+
+- name: run docker container --> [orca_thr]
+  shell: |
+    docker run \
+    --name {{ docker.container.orca_thr.name }} -it -d \
+    --restart=always \
+    -p 8300:8000 -p 5632:5432 -p 2522:22 \
+    -e CLINIC_TYPE=THR \
+    {{ docker.image.name }};
+  tags:
+    - orca
+
+- name: run docker container --> [orca_ttc]
+  shell: |
+    docker run \
+    --name {{ docker.container.orca_ttc.name }} -it -d \
+    --restart=always \
+    -p 8400:8000 -p 5732:5432 -p 2622:22 \
+    -e CLINIC_TYPE=TTC \
+    {{ docker.image.name }};
+  tags:
+    - orca

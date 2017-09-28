@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  become: yes
+  connection: local
+  roles:
+    - common
+    - nginx
+    - php-nginx
+    - mysql-nginx
+    - vagrant
+    - wordpress

@@ -1,0 +1,10 @@
+---
+  docker:
+    group:
+      name: docker
+    user:
+      name: vagrant
+    other_args: --insecure-registry 192.168.21.155:5000
+
+  python:
+    bin: python2.6

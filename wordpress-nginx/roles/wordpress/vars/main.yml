@@ -1,0 +1,15 @@
+---
+  wordpress:
+    version: latest
+    database:
+      name: wp_db
+      user: root
+      password: h2system
+      host: localhost
+      charset: utf-8
+      collate: utf8_general_ci
+      table_prefix: wp_
+    debug: true
+    install_dir: /var/www/wordpress
+    owner: vagrant
+    group: vagrant

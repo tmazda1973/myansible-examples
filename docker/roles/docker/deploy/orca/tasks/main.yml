@@ -1,0 +1,14 @@
+---
+#-------------------------------------------------------------------------------
+# Execute tasks
+#-------------------------------------------------------------------------------
+- include: _deploy_modules.yml
+  when:
+    - docker_build is defined
+    - "docker_build == 'true'"
+
+- include: _docker_setup.yml
+  when:
+    - docker_build is defined
+    - "docker_build == 'true'"
+

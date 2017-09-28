@@ -1,0 +1,4 @@
+---
+  zone: Asia/Tokyo
+  upload_tmp_dir: /tmp
+  session_save_path: /var/lib/php/session

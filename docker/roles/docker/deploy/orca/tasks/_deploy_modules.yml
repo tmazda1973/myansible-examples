@@ -1,0 +1,45 @@
+---
+#-------------------------------------------------------------------------------
+# Deploy docker devtool modules
+#-------------------------------------------------------------------------------
+- name: create tools home directory
+  file:
+   path: "{{ docker.tools.home }}"
+   state: directory
+   mode: 0777
+  ignore_errors: true
+  tags:
+    - orca
+
+- name: delete git clone directory
+  file:
+    path: "{{ docker.tools.home }}/{{ docker.tools.name }}"
+    state: absent
+  ignore_errors: true
+  tags:
+    - orca
+
+- name: create git clone directory
+  file:
+   path: "{{ docker.tools.home }}/{{ docker.tools.name }}"
+   state: directory
+   mode: 0777
+  ignore_errors: true
+  tags:
+    - orca
+
+- name: git clone module
+  git:
+    repo: "{{ docker.tools.git.protocol }}://{{ docker.tools.git.user }}:{{ docker.tools.git.password }}@{{ docker.tools.git.repo }}"
+    dest: "{{ docker.tools.home }}/{{ docker.tools.name }}"
+    version: "{{ docker.tools.git.branch }}"
+  tags:
+    - orca
+
+- name: chmod deploy root  - [docker devtools]
+  command: 'bash -lc "{{ item }}"'
+  with_items:
+    - 'chmod -R 777 {{ docker.tools.home }}/{{ docker.tools.name }}'
+    - 'chown -R {{ docker.tools.user }}:{{ docker.tools.user }} {{ docker.tools.home }}/{{ docker.tools.name }}'
+  tags:
+    - orca

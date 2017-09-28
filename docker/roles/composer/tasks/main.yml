@@ -1,0 +1,58 @@
+---
+#-------------------------------------------------------------------------------
+# Install PHP
+# ImageMagickは-lastが付くライブラリをインストールしています。そうしないとバージョンの不一致でWarnningが出るためです
+#-------------------------------------------------------------------------------
+- name: install php
+  yum: name={{ item }} state=present enablerepo=remi,remi-php56
+  with_items:
+    - php
+    - php-devel
+    - php-mbstring
+    - php-mcrypt
+    - php-pear
+    - php-pecl-xdebug
+    - php-xml
+    - php-phpunit-PHPUnit
+    - php-gd
+    - php-bcmath
+    - gcc
+    - ImageMagick
+    - ImageMagick-devel
+    - php-pecl-imagick
+  tags:
+    - php
+
+#-------------------------------------------------------------------------------
+# Install Composer
+#-------------------------------------------------------------------------------
+- name: install composer
+  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin creates=/usr/local/bin/composer
+  tags:
+    - php
+    - composer
+
+- name: rename composer.phar to composer
+  shell: mv /usr/local/bin/composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
+  tags:
+    - php
+    - composer
+
+- name: make composer executable
+  file: path=/usr/local/bin/composer mode=a+x state=file
+  tags:
+    - php
+    - composer
+
+- name: use packagist mirror packagist.jp
+  shell: /usr/local/bin/composer config -g repositories.packagist composer https://packagist.jp
+  tags:
+    - php
+    - composer
+
+- name: use hirak/prestissimo
+  shell: /usr/local/bin/composer global require hirak/prestissimo
+  ignore_errors: true
+  tags:
+    - php
+    - composer

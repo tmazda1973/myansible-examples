@@ -1,0 +1,25 @@
+---
+  docker:
+    api:
+      version: 1.19
+    image:
+      name: specialty-orca/ubuntu
+    container:
+      orca_thj:
+        name: specialty-orca_thj
+      orca_tmi:
+        name: specialty-orca_tmi
+      orca_thr:
+        name: specialty-orca_thr
+      orca_ttc:
+        name: specialty-orca_ttc
+    tools:
+      home: /var/www/devtools
+      name: specialty-orca
+      user: vagrant
+      git:
+        protocol: https
+        repo: h2system.backlog.jp/git/KIRIN_CORP_INFRA/specialty-orca-docker-local-dev.git
+        branch: master
+        user: honda
+        password: CsvXgSHH

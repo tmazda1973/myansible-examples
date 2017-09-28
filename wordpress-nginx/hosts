@@ -1,0 +1,8 @@
+[docker-clinicsystem]
+clinicsystem
+
+[develop]
+
+[staging]
+
+[production]

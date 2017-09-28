@@ -1,0 +1,10 @@
+---
+  mysql:
+    database: wp_db
+    root:
+      password: h2system
+    user:
+      name: wordpress
+      password: wordpress
+    phpmyadmin:
+      path: /usr/share/phpMyAdmin
